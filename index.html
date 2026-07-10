@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
@@ -16,45 +17,48 @@
 
     body {
       margin: 0;
-      background: #101114;
+      background: #0f1013;
       color: #ffffff;
       font-family:
         -apple-system,
         BlinkMacSystemFont,
         "Segoe UI",
         "Yu Gothic",
+        "Meiryo",
         sans-serif;
     }
 
     header {
       position: sticky;
       top: 0;
-      z-index: 10;
-      padding: 16px;
-      background: rgba(16, 17, 20, 0.95);
-      border-bottom: 1px solid #333;
+      z-index: 20;
+      padding: 14px 16px;
+      background: rgba(15, 16, 19, 0.96);
+      border-bottom: 1px solid #33363c;
       text-align: center;
+      backdrop-filter: blur(8px);
     }
 
     header h1 {
       margin: 0;
-      font-size: 22px;
+      font-size: 21px;
+      letter-spacing: 0.5px;
     }
 
     header p {
       margin: 6px 0 0;
-      color: #bbbbbb;
-      font-size: 13px;
+      color: #b9bdc6;
+      font-size: 12px;
     }
 
     main {
       width: min(100%, 1100px);
       margin: 0 auto;
-      padding: 16px;
+      padding: 18px 14px 40px;
     }
 
     .genre {
-      margin-bottom: 34px;
+      margin-bottom: 36px;
     }
 
     .genre h2 {
@@ -66,63 +70,139 @@
 
     .pattern-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
 
     .pattern-card {
+      position: relative;
       padding: 0;
       overflow: hidden;
       background: #202226;
       color: #ffffff;
-      border: 1px solid #34363b;
-      border-radius: 10px;
+      border: 1px solid #363941;
+      border-radius: 11px;
       cursor: pointer;
       text-align: left;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        transform 0.15s ease,
+        border-color 0.15s ease;
     }
 
-    .pattern-card img {
-      display: block;
+    .pattern-card:hover {
+      transform: translateY(-2px);
+      border-color: #6c717d;
+    }
+
+    .pattern-card.previewing {
+      border-color: #ffffff;
+    }
+
+    .media-area {
+      position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: #000000;
+    }
+
+    .preview-video,
+    .thumbnail-image {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       background: #000000;
     }
 
+    .preview-video {
+      opacity: 0;
+      transition: opacity 0.18s ease;
+    }
+
+    .pattern-card.previewing .preview-video {
+      opacity: 1;
+    }
+
+    .pattern-card.previewing .thumbnail-image {
+      opacity: 0;
+    }
+
+    .thumbnail-image {
+      transition: opacity 0.18s ease;
+    }
+
+    .play-mark {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      background: rgba(0, 0, 0, 0.68);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 50%;
+      font-size: 15px;
+      pointer-events: none;
+    }
+
+    .preview-label {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      padding: 4px 7px;
+      background: rgba(0, 0, 0, 0.72);
+      border-radius: 5px;
+      color: #ffffff;
+      font-size: 10px;
+      pointer-events: none;
+    }
+
+    .pattern-card.previewing .preview-label {
+      background: rgba(255, 255, 255, 0.9);
+      color: #111111;
+    }
+
     .pattern-info {
-      padding: 10px;
+      padding: 10px 11px 11px;
     }
 
     .pattern-title {
       margin: 0 0 5px;
       font-size: 15px;
-      font-weight: bold;
+      font-weight: 700;
     }
 
     .dmx-value {
       margin: 0;
-      color: #bfc2c8;
+      color: #c5c9d1;
       font-size: 12px;
     }
 
     dialog {
-      width: min(94%, 800px);
+      width: min(94%, 850px);
+      max-width: 850px;
       padding: 0;
       overflow: hidden;
-      background: #17181b;
+      background: #17191d;
       color: #ffffff;
-      border: 1px solid #555555;
-      border-radius: 12px;
+      border: 1px solid #555b66;
+      border-radius: 13px;
     }
 
     dialog::backdrop {
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.88);
     }
 
     .player-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
       padding: 12px 14px;
     }
 
@@ -132,9 +212,11 @@
     }
 
     .close-button {
+      flex: 0 0 auto;
       width: 40px;
       height: 40px;
-      background: #33363c;
+      padding: 0;
+      background: #33363d;
       color: #ffffff;
       border: none;
       border-radius: 50%;
@@ -142,22 +224,38 @@
       cursor: pointer;
     }
 
-    video {
+    #videoPlayer {
       display: block;
       width: 100%;
-      max-height: 70vh;
+      max-height: 72vh;
       background: #000000;
     }
 
     .player-details {
-      padding: 12px 14px 18px;
-      color: #d1d1d1;
+      padding: 12px 14px 16px;
+      color: #d4d6dc;
       font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .mobile-guide {
+      display: block;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .mobile-guide {
+        display: none;
+      }
     }
 
     @media (min-width: 700px) {
       .pattern-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      main {
+        padding-right: 20px;
+        padding-left: 20px;
       }
     }
   </style>
@@ -167,12 +265,19 @@
 
   <header>
     <h1>LASER PATTERN LIBRARY</h1>
-    <p>サムネイルをタップすると動画を再生します</p>
+
+    <p>
+      PC：マウスを乗せてプレビュー・クリックで拡大再生
+      <span class="mobile-guide">
+        ／ スマホ：1回タップでプレビュー・もう一度タップで拡大再生
+      </span>
+    </p>
   </header>
 
   <main id="patternList"></main>
 
   <dialog id="videoDialog">
+
     <div class="player-header">
       <h3 id="playerTitle">パターン</h3>
 
@@ -193,10 +298,24 @@
       preload="metadata"
     ></video>
 
-    <div class="player-details" id="playerDetails"></div>
+    <div
+      class="player-details"
+      id="playerDetails"
+    ></div>
+
   </dialog>
 
   <script>
+    /*
+      ここに50パターン分を登録します。
+
+      video:
+      videosフォルダ内のMP4ファイル
+
+      thumbnail:
+      thumbnailsフォルダ内の画像ファイル
+    */
+
    const patterns = [
   {
     genre: "ジャンル1",
@@ -206,57 +325,66 @@
     video: "test.mp4",
     thumbnail: "test.jpg"
   }
+];
+
+    const listElement =
+      document.getElementById("patternList");
+
+    const dialog =
+      document.getElementById("videoDialog");
+
+    const videoPlayer =
+      document.getElementById("videoPlayer");
+
+    const playerTitle =
+      document.getElementById("playerTitle");
+
+    const playerDetails =
+      document.getElementById("playerDetails");
+
+    const closeButton =
+      document.getElementById("closeButton");
+
+    let activePreviewCard = null;
+    let activePreviewVideo = null;
+
+    const hasHover =
+      window.matchMedia(
+        "(hover: hover) and (pointer: fine)"
+      ).matches;
+
+    const genres = [
+      ...new Set(
+        patterns.map(pattern => pattern.genre)
+      )
     ];
 
-    const listElement = document.getElementById("patternList");
-    const dialog = document.getElementById("videoDialog");
-    const videoPlayer = document.getElementById("videoPlayer");
-    const playerTitle = document.getElementById("playerTitle");
-    const playerDetails = document.getElementById("playerDetails");
-    const closeButton = document.getElementById("closeButton");
-
-    const genres = [...new Set(patterns.map(pattern => pattern.genre))];
-
     genres.forEach(genreName => {
-      const section = document.createElement("section");
+      const section =
+        document.createElement("section");
+
       section.className = "genre";
 
-      const heading = document.createElement("h2");
+      const heading =
+        document.createElement("h2");
+
       heading.textContent = genreName;
 
-      const grid = document.createElement("div");
+      const grid =
+        document.createElement("div");
+
       grid.className = "pattern-grid";
 
       patterns
-        .filter(pattern => pattern.genre === genreName)
+        .filter(
+          pattern =>
+            pattern.genre === genreName
+        )
         .forEach(pattern => {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "pattern-card";
+          const card =
+            createPatternCard(pattern);
 
-          button.innerHTML = `
-            <img
-              src="${pattern.thumbnail}"
-              alt="${pattern.genre} ${pattern.title}"
-              loading="lazy"
-            >
-
-            <div class="pattern-info">
-              <p class="pattern-title">
-                ${pattern.title}
-              </p>
-
-              <p class="dmx-value">
-                ${pattern.dmx}
-              </p>
-            </div>
-          `;
-
-          button.addEventListener("click", () => {
-            openVideo(pattern);
-          });
-
-          grid.appendChild(button);
+          grid.appendChild(card);
         });
 
       section.appendChild(heading);
@@ -264,38 +392,296 @@
       listElement.appendChild(section);
     });
 
+    function createPatternCard(pattern) {
+      const card =
+        document.createElement("article");
+
+      card.className = "pattern-card";
+      card.tabIndex = 0;
+
+      const mediaArea =
+        document.createElement("div");
+
+      mediaArea.className = "media-area";
+
+      const thumbnail =
+        document.createElement("img");
+
+      thumbnail.className = "thumbnail-image";
+      thumbnail.src = pattern.thumbnail;
+      thumbnail.alt =
+        `${pattern.genre} ${pattern.title}`;
+
+      thumbnail.loading = "lazy";
+
+      const previewVideo =
+        document.createElement("video");
+
+      previewVideo.className = "preview-video";
+      previewVideo.muted = true;
+      previewVideo.loop = true;
+      previewVideo.playsInline = true;
+      previewVideo.preload = "none";
+
+      previewVideo.setAttribute("muted", "");
+      previewVideo.setAttribute("playsinline", "");
+      previewVideo.setAttribute(
+        "webkit-playsinline",
+        ""
+      );
+
+      const playMark =
+        document.createElement("div");
+
+      playMark.className = "play-mark";
+      playMark.textContent = "▶";
+
+      const previewLabel =
+        document.createElement("div");
+
+      previewLabel.className = "preview-label";
+      previewLabel.textContent = "PREVIEW";
+
+      mediaArea.appendChild(thumbnail);
+      mediaArea.appendChild(previewVideo);
+      mediaArea.appendChild(playMark);
+      mediaArea.appendChild(previewLabel);
+
+      const info =
+        document.createElement("div");
+
+      info.className = "pattern-info";
+
+      const title =
+        document.createElement("p");
+
+      title.className = "pattern-title";
+      title.textContent = pattern.title;
+
+      const dmx =
+        document.createElement("p");
+
+      dmx.className = "dmx-value";
+      dmx.textContent = pattern.dmx;
+
+      info.appendChild(title);
+      info.appendChild(dmx);
+
+      card.appendChild(mediaArea);
+      card.appendChild(info);
+
+      if (hasHover) {
+        card.addEventListener(
+          "mouseenter",
+          () => {
+            startPreview(
+              card,
+              previewVideo,
+              pattern.video
+            );
+          }
+        );
+
+        card.addEventListener(
+          "mouseleave",
+          () => {
+            stopPreview(
+              card,
+              previewVideo
+            );
+          }
+        );
+
+        card.addEventListener(
+          "click",
+          () => {
+            openVideo(pattern);
+          }
+        );
+      } else {
+        card.addEventListener(
+          "click",
+          event => {
+            event.preventDefault();
+
+            if (
+              activePreviewCard === card &&
+              !previewVideo.paused
+            ) {
+              stopPreview(
+                card,
+                previewVideo
+              );
+
+              openVideo(pattern);
+              return;
+            }
+
+            startPreview(
+              card,
+              previewVideo,
+              pattern.video
+            );
+          }
+        );
+      }
+
+      card.addEventListener(
+        "keydown",
+        event => {
+          if (
+            event.key === "Enter" ||
+            event.key === " "
+          ) {
+            event.preventDefault();
+            openVideo(pattern);
+          }
+        }
+      );
+
+      return card;
+    }
+
+    function startPreview(
+      card,
+      previewVideo,
+      videoPath
+    ) {
+      if (
+        activePreviewVideo &&
+        activePreviewVideo !== previewVideo
+      ) {
+        stopPreview(
+          activePreviewCard,
+          activePreviewVideo
+        );
+      }
+
+      if (!previewVideo.src) {
+        previewVideo.src = videoPath;
+      }
+
+      card.classList.add("previewing");
+
+      activePreviewCard = card;
+      activePreviewVideo = previewVideo;
+
+      previewVideo
+        .play()
+        .catch(error => {
+          console.log(
+            "プレビューを自動再生できませんでした。",
+            error
+          );
+        });
+    }
+
+    function stopPreview(
+      card,
+      previewVideo
+    ) {
+      if (!card || !previewVideo) {
+        return;
+      }
+
+      previewVideo.pause();
+
+      try {
+        previewVideo.currentTime = 0;
+      } catch (error) {
+        console.log(error);
+      }
+
+      card.classList.remove("previewing");
+
+      if (
+        activePreviewVideo === previewVideo
+      ) {
+        activePreviewCard = null;
+        activePreviewVideo = null;
+      }
+    }
+
+    function stopAllPreviews() {
+      if (
+        activePreviewCard &&
+        activePreviewVideo
+      ) {
+        stopPreview(
+          activePreviewCard,
+          activePreviewVideo
+        );
+      }
+    }
+
     function openVideo(pattern) {
+      stopAllPreviews();
+
       playerTitle.textContent =
         `${pattern.genre}　${pattern.title}`;
 
-      playerDetails.textContent = pattern.dmx;
+      playerDetails.textContent =
+        pattern.dmx;
 
       videoPlayer.src = pattern.video;
+
       dialog.showModal();
 
-      videoPlayer.play().catch(() => {
-        // スマホの設定により自動再生されない場合があります。
-      });
+      videoPlayer
+        .play()
+        .catch(() => {
+          /*
+            スマホの設定によっては、
+            再生ボタンを押す必要があります。
+          */
+        });
     }
 
     function closeVideo() {
       videoPlayer.pause();
       videoPlayer.removeAttribute("src");
       videoPlayer.load();
-      dialog.close();
+
+      if (dialog.open) {
+        dialog.close();
+      }
     }
 
-    closeButton.addEventListener("click", closeVideo);
+    closeButton.addEventListener(
+      "click",
+      closeVideo
+    );
 
-    dialog.addEventListener("click", event => {
-      if (event.target === dialog) {
+    dialog.addEventListener(
+      "click",
+      event => {
+        if (event.target === dialog) {
+          closeVideo();
+        }
+      }
+    );
+
+    dialog.addEventListener(
+      "cancel",
+      event => {
+        event.preventDefault();
         closeVideo();
       }
-    });
+    );
 
-    videoPlayer.addEventListener("ended", () => {
-      closeVideo();
-    });
+    videoPlayer.addEventListener(
+      "ended",
+      closeVideo
+    );
+
+    document.addEventListener(
+      "visibilitychange",
+      () => {
+        if (document.hidden) {
+          stopAllPreviews();
+        }
+      }
+    );
   </script>
 
 </body>
