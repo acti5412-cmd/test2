@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>レーザーパターン一覧</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #101114;
+      color: #ffffff;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Yu Gothic",
+        sans-serif;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 16px;
+      background: rgba(16, 17, 20, 0.95);
+      border-bottom: 1px solid #333;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    header p {
+      margin: 6px 0 0;
+      color: #bbbbbb;
+      font-size: 13px;
+    }
+
+    main {
+      width: min(100%, 1100px);
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .genre {
+      margin-bottom: 34px;
+    }
+
+    .genre h2 {
+      margin: 0 0 14px;
+      padding-left: 10px;
+      border-left: 5px solid #ffffff;
+      font-size: 19px;
+    }
+
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .pattern-card {
+      padding: 0;
+      overflow: hidden;
+      background: #202226;
+      color: #ffffff;
+      border: 1px solid #34363b;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .pattern-card img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: #000000;
+    }
+
+    .pattern-info {
+      padding: 10px;
+    }
+
+    .pattern-title {
+      margin: 0 0 5px;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .dmx-value {
+      margin: 0;
+      color: #bfc2c8;
+      font-size: 12px;
+    }
+
+    dialog {
+      width: min(94%, 800px);
+      padding: 0;
+      overflow: hidden;
+      background: #17181b;
+      color: #ffffff;
+      border: 1px solid #555555;
+      border-radius: 12px;
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.85);
+    }
+
+    .player-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+    }
+
+    .player-header h3 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .close-button {
+      width: 40px;
+      height: 40px;
+      background: #33363c;
+      color: #ffffff;
+      border: none;
+      border-radius: 50%;
+      font-size: 23px;
+      cursor: pointer;
+    }
+
+    video {
+      display: block;
+      width: 100%;
+      max-height: 70vh;
+      background: #000000;
+    }
+
+    .player-details {
+      padding: 12px 14px 18px;
+      color: #d1d1d1;
+      font-size: 14px;
+    }
+
+    @media (min-width: 700px) {
+      .pattern-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>LASER PATTERN LIBRARY</h1>
+    <p>サムネイルをタップすると動画を再生します</p>
+  </header>
+
+  <main id="patternList"></main>
+
+  <dialog id="videoDialog">
+    <div class="player-header">
+      <h3 id="playerTitle">パターン</h3>
+
+      <button
+        type="button"
+        class="close-button"
+        id="closeButton"
+        aria-label="閉じる"
+      >
+        ×
+      </button>
+    </div>
+
+    <video
+      id="videoPlayer"
+      controls
+      playsinline
+      preload="metadata"
+    ></video>
+
+    <div class="player-details" id="playerDetails"></div>
+  </dialog>
+
+  <script>
+   const patterns = [
+  {
+    genre: "ジャンル1",
+    number: "01",
+    title: "パターン01",
+    dmx: "DMX値：0～9",
+    video: "test.mp4",
+    thumbnail: "test.jpg"
+  }
+    ];
+
+    const listElement = document.getElementById("patternList");
+    const dialog = document.getElementById("videoDialog");
+    const videoPlayer = document.getElementById("videoPlayer");
+    const playerTitle = document.getElementById("playerTitle");
+    const playerDetails = document.getElementById("playerDetails");
+    const closeButton = document.getElementById("closeButton");
+
+    const genres = [...new Set(patterns.map(pattern => pattern.genre))];
+
+    genres.forEach(genreName => {
+      const section = document.createElement("section");
+      section.className = "genre";
+
+      const heading = document.createElement("h2");
+      heading.textContent = genreName;
+
+      const grid = document.createElement("div");
+      grid.className = "pattern-grid";
+
+      patterns
+        .filter(pattern => pattern.genre === genreName)
+        .forEach(pattern => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "pattern-card";
+
+          button.innerHTML = `
+            <img
+              src="${pattern.thumbnail}"
+              alt="${pattern.genre} ${pattern.title}"
+              loading="lazy"
+            >
+
+            <div class="pattern-info">
+              <p class="pattern-title">
+                ${pattern.title}
+              </p>
+
+              <p class="dmx-value">
+                ${pattern.dmx}
+              </p>
+            </div>
+          `;
+
+          button.addEventListener("click", () => {
+            openVideo(pattern);
+          });
+
+          grid.appendChild(button);
+        });
+
+      section.appendChild(heading);
+      section.appendChild(grid);
+      listElement.appendChild(section);
+    });
+
+    function openVideo(pattern) {
+      playerTitle.textContent =
+        `${pattern.genre}　${pattern.title}`;
+
+      playerDetails.textContent = pattern.dmx;
+
+      videoPlayer.src = pattern.video;
+      dialog.showModal();
+
+      videoPlayer.play().catch(() => {
+        // スマホの設定により自動再生されない場合があります。
+      });
+    }
+
+    function closeVideo() {
+      videoPlayer.pause();
+      videoPlayer.removeAttribute("src");
+      videoPlayer.load();
+      dialog.close();
+    }
+
+    closeButton.addEventListener("click", closeVideo);
+
+    dialog.addEventListener("click", event => {
+      if (event.target === dialog) {
+        closeVideo();
+      }
+    });
+
+    videoPlayer.addEventListener("ended", () => {
+      closeVideo();
+    });
+  </script>
+
+</body>
+</html>
